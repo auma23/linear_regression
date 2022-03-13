@@ -1,0 +1,92 @@
+---
+title: "Regression sample"
+author: "Auma"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+
+```
+
+
+# Linear regression is used to predict the value of an outcome variable Y 
+# based on one or more input predictor variables X.
+# The aim is to establish a linear relationship (a mathematical formula) 
+# between the predictor variable(s) and the response variable, 
+# so that, we can use this formula to estimate the value of the response Y, 
+# when only the predictors (Xs) values are known.
+
+```{r pressure, echo=FALSE}
+
+```
+# Loading tidyverse
+library(tidyverse)
+numberNA = sum(is.na(train))
+if(numberNA > 0) {
+  cat('Number of missing values found: ', numberNA)
+  cat('\nRemoving missing values...')
+  train = train[complete.cases(train), ]
+}
+# Check for outliers
+# Divide the graph area in 2 columns
+par(mfrow = c(1, 2))
+# Boxplot for X
+boxplot(train$x, main='X', sub=paste('Outliers: ', boxplot.stats(train$x)$out))
+# Boxplot for Y
+boxplot(train$y, main='Y', sub=paste('Outliers: ', boxplot.stats(train$y)$out))
+# Both boxplots shows no outliers and distribution is not skewed.
+# Finding correlation
+# Correlation is a statistical measure that suggests the level of linear dependence between two variables,
+# that occur in pair. 
+# Its value is between -1 to +1
+# Above 0 is positive correlation i.e. X is directly proportional to Y.
+# Below 0 is negative correlation i.e. X is inversly proportional to Y.
+# Value 0 suggests weak relation.
+cor(train$x, train$y)
+# 0.99 shows a very strong relation.
+# Fitting Simple Linear regression
+# . is used to fit predictor using all independent variables
+regressor = lm(formula = y ~.,
+               data = train)
+ summary(regressor)
+ names(regressor)
+ # In Linear Regression, the Null Hypothesis is that the coefficients associated with the variables is equal to zero. 
+# The alternate hypothesis is that the coefficients are not equal to zero 
+# (i.e. there exists a relationship between the independent variable in question and the dependent variable).
+# P value has 3 stars which means x is of very high statistical significance.
+# P value is less than 0. Genraaly below 0.05 is considered good.
+# R-Squared tells us is the proportion of variation in the dependent (response) variable that has been explained by this model.
+# R square is 0.99 which shows very good variation between dependent variable(y) and independent variable(x).
+ # Visualizing the training set results
+plot(train$x , train$y)
+abline(regressor , col=4)
+# Above plot shows there are no outliers.
+# It clearly shows there is a linear relationship between x and y which is continous in nature.
+#residual plots to see if the linear regression assumptions are valid or not for the model
+par(mfrow=c(2,2))
+plot(regressor)
+#linear regression assumption are not voilated its a good model.
+# Predicting the test results
+y_pred = predict(regressor, newdata = test)
+summary(y_pred)
+y_pred
+# Visualizing the test set results
+plot(test$x,test$y)
+abline(regressor , col=2)
+# Plot shows model was a good fit.
+# finding error metrics
+library(DMwR2)
+regression.evaluation(test$y ,y_pred)
+install.packages(DMwR)
+??regr.eval
